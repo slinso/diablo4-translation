@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "D4 Glyph Translator",
+  "version": "1.0",
+  "description": "Translates German Diablo 4 glyph names to English on vitablo.de",
+  "content_scripts": [
+    {
+      "matches": ["*://vitablo.de/*build-guides/*", "*://vitablo.de/*build-guide/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "48": "icon.png"
+  }
+}

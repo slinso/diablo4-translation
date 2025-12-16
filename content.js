@@ -1,0 +1,220 @@
+// D4 Glyph Translator - Translates German glyph names to English
+// Format: "German (English)"
+
+const translations = {
+  "Macht": "Might",
+  "Zorn": "Wrath",
+  "Zermalmer": "Crusher",
+  "Poltern": "Rumble",
+  "Unerschrocken": "Undaunted",
+  "Rache": "Revenge",
+  "Marschall": "Marshal",
+  "Groll": "Ire",
+  "Brodelnd": "Seething",
+  "Tornado": "Twister",
+  "Beidhändig": "Ambidextrous",
+  "Blutfresser": "Bloodfeeder",
+  "Rauferei": "Brawl",
+  "Reißer und Klaue": "Fang and Claw",
+  "Geist": "Spirit",
+  "Hüter": "Keeper",
+  "Werbär": "Werebear",
+  "Werwolf": "Werewolf",
+  "Gestaltwandler": "Shapeshifter",
+  "Schützer": "Protector",
+  "Kontrolle": "Control",
+  "Dominieren": "Dominate",
+  "Essenz": "Essence",
+  "Grabhüter": "Gravekeeper",
+  "Totenbeleber": "Deadraiser",
+  "Schändung": "Desecration",
+  "Golem": "Golem",
+  "Abyssal": "Abyssal",
+  "Dunkelheit": "Darkness",
+  "Verstärken": "Amplify",
+  "Entladen": "Fulminate",
+  "Entfesseln": "Unleash",
+  "Zertrümmerung": "Destruction",
+  "Winter": "Winter",
+  "Abschirmend": "Warding",
+  "Elementarist": "Elementalist",
+  "Kopfjäger": "Headhunter",
+  "Ausbeuten": "Exploit",
+  "Übertreffen": "Outmatch",
+  "Kolossal": "Colossal",
+  "Verfolger": "Tracker",
+  "Lauffeuer": "Wildfire",
+  "Vielseitigkeit": "Versatility",
+  "Splitter": "Chip",
+  "Absorbierer": "Imbiber",
+  "Schlinger": "Guzzler",
+  "Hybris": "Hubris",
+  "Hinterhalt": "Ambush",
+  "Verringern": "Diminish",
+  "Fluidität": "Fluidity",
+  "Falle": "Snare",
+  "Verschlagen": "Devious",
+  "Herausforderer": "Challenger",
+  "Körperlich": "Corporeal",
+  "Auslöscher": "Eliminator",
+  "Eitern": "Fester",
+  "Besonnen": "Canny",
+  "Anrufung": "Invocation",
+  "Klaue": "Talon",
+  "Stolz": "Turf",
+  "Gezackte Feder": "Jagged Plume",
+  "Menagerist": "Menagerist",
+  "Kryopathie": "Cryopathy",
+  "Frostfresser": "Frostfeeder",
+  "Pyromane": "Pyromaniac",
+  "Explosiv": "Explosive",
+  "Magier": "Mage",
+  "Wächter": "Sentinel",
+  "Taktiker": "Tactician",
+  "Inbrünstig": "Feverous",
+  "Pracht": "Resplendence",
+  "Geschliffen": "Honed",
+  "Apostel": "Apostle",
+  "Richter": "Judicator",
+  "Schleifen": "Hone",
+  "Gebieter": "Arbiter",
+  "Gesetz": "Law",
+  "Beschörer": "Conjurer",
+  "Ritual": "Ritual",
+  "Angeboren": "Innate",
+  "Gebiet": "Territorial",
+  "Flammenfresser": "Flamefeeder",
+  "Elektroschock": "Electrocution",
+  "Tektonisch": "Tectonic",
+  "Adept": "Adept",
+  "Waffenmeister": "Weapon Master",
+  "Kampf": "Combat",
+  "Verstärkt": "Reinforced",
+  "Spalter": "Cleaver",
+  "Krieger": "Warrior",
+  "Geißel": "Scourge",
+  "Verzauberer": "Enchanter",
+  "Nachtpirscher": "Nightstalker",
+  "Fackel": "Torch",
+  "Henker": "Executioner",
+  "Haltung": "Poise",
+  "Wildnis": "Wilds",
+  "Waldläufer": "Ranger",
+  "Exhumierung": "Exhumation",
+  "Konsum": "Consumption",
+  "Wandler": "Shifter",
+  "Erde und Himmel": "Earth and Sky",
+  "Mensch": "Human",
+  "Fluch": "Bane",
+  "Näher": "Closer",
+  "Bluttrinker": "Blood-drinker"
+};
+
+// Sort by length (longest first) to avoid partial replacements
+const sortedKeys = Object.keys(translations).sort((a, b) => b.length - a.length);
+
+// Build regex pattern for all German terms
+const pattern = new RegExp(
+  '\\b(' + sortedKeys.map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')\\b',
+  'g'
+);
+
+// Track processed nodes to avoid double-processing
+const processedNodes = new WeakSet();
+
+function translateTextNode(textNode) {
+  if (processedNodes.has(textNode)) return;
+
+  const originalText = textNode.textContent;
+  let newText = originalText;
+
+  // Replace each German term with "German (English)" format
+  newText = newText.replace(pattern, (match) => {
+    const english = translations[match];
+    if (english && !originalText.includes(`(${english})`)) {
+      return `${match} (${english})`;
+    }
+    return match;
+  });
+
+  if (newText !== originalText) {
+    textNode.textContent = newText;
+    processedNodes.add(textNode);
+  }
+}
+
+function walkTextNodes(element) {
+  const walker = document.createTreeWalker(
+    element,
+    NodeFilter.SHOW_TEXT,
+    {
+      acceptNode: (node) => {
+        // Skip script, style, and already processed nodes
+        const parent = node.parentElement;
+        if (!parent) return NodeFilter.FILTER_REJECT;
+        const tagName = parent.tagName.toLowerCase();
+        if (tagName === 'script' || tagName === 'style' || tagName === 'noscript') {
+          return NodeFilter.FILTER_REJECT;
+        }
+        // Only process nodes with actual text content
+        if (node.textContent.trim().length === 0) {
+          return NodeFilter.FILTER_REJECT;
+        }
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    }
+  );
+
+  const textNodes = [];
+  while (walker.nextNode()) {
+    textNodes.push(walker.currentNode);
+  }
+
+  textNodes.forEach(translateTextNode);
+}
+
+// Initial translation pass
+function initialTranslation() {
+  walkTextNodes(document.body);
+}
+
+// Observe DOM for dynamic content
+function setupObserver() {
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      // Handle added nodes
+      mutation.addedNodes.forEach((node) => {
+        if (node.nodeType === Node.ELEMENT_NODE) {
+          walkTextNodes(node);
+        } else if (node.nodeType === Node.TEXT_NODE) {
+          translateTextNode(node);
+        }
+      });
+
+      // Handle character data changes (text content updates)
+      if (mutation.type === 'characterData' && mutation.target.nodeType === Node.TEXT_NODE) {
+        processedNodes.delete(mutation.target);
+        translateTextNode(mutation.target);
+      }
+    });
+  });
+
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+    characterData: true
+  });
+}
+
+// Run when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    initialTranslation();
+    setupObserver();
+  });
+} else {
+  initialTranslation();
+  setupObserver();
+}
+
+console.log('D4 Glyph Translator loaded - translating German glyph names to English');
