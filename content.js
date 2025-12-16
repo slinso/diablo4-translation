@@ -173,28 +173,40 @@ function walkTextNodes(element) {
   textNodes.forEach(translateTextNode);
 }
 
-// Initial translation pass
+// Initial translation pass - only within paragon board rows
 function initialTranslation() {
-  walkTextNodes(document.body);
+  document.querySelectorAll('.d4para-row').forEach(row => {
+    walkTextNodes(row);
+  });
 }
 
 // Observe DOM for dynamic content
 function setupObserver() {
   const observer = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
-      // Handle added nodes
+      // Handle added nodes - only within .d4para-row elements
       mutation.addedNodes.forEach((node) => {
         if (node.nodeType === Node.ELEMENT_NODE) {
-          walkTextNodes(node);
+          if (node.classList?.contains('d4para-row')) {
+            walkTextNodes(node);
+          } else if (node.closest('.d4para-row')) {
+            walkTextNodes(node);
+          } else if (node.querySelectorAll) {
+            node.querySelectorAll('.d4para-row').forEach(row => walkTextNodes(row));
+          }
         } else if (node.nodeType === Node.TEXT_NODE) {
-          translateTextNode(node);
+          if (node.parentElement?.closest('.d4para-row')) {
+            translateTextNode(node);
+          }
         }
       });
 
-      // Handle character data changes (text content updates)
+      // Handle character data changes - only within .d4para-row elements
       if (mutation.type === 'characterData' && mutation.target.nodeType === Node.TEXT_NODE) {
-        processedNodes.delete(mutation.target);
-        translateTextNode(mutation.target);
+        if (mutation.target.parentElement?.closest('.d4para-row')) {
+          processedNodes.delete(mutation.target);
+          translateTextNode(mutation.target);
+        }
       }
     });
   });
