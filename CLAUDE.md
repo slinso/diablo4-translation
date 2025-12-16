@@ -11,8 +11,9 @@ Firefox extension that translates German Diablo 4 paragon glyph names to English
 ## How It Works
 
 1. Content script runs on matching pages
-2. Walks all text nodes and replaces German glyph names with "German (English)" format
-3. MutationObserver watches for dynamically loaded content
+2. Only translates text within `.d4para-row` elements (paragon board rows)
+3. Replaces German glyph names with "German (English)" format
+4. MutationObserver watches for dynamically loaded content within paragon boards
 
 ## Adding New Translations
 
